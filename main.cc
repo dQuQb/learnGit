@@ -1,75 +1,50 @@
-#include <iostream>
-using namespace std;
+template <class T>
+void shiftdown(T*, int, int);
+template <class T>
+void makeheap(T*, int);
+template <class T>
+void heapsort(T*, int);
 
 template <class T>
-void mergesort(T*, int);
-template <class T>
-void _mergesort(T*, int, int);
-template <class T>
-void merge(T*, int, int, int);
-
-template <class T>
-void mergesort(T* A, int length) {
-	_mergesort(A, 0, length - 1);
+void shiftdown(T* A, int index, int length) {
+	int largechild;
+	if (index * 2 + 1 < length) {		// This index has at least one child
+		if (index * 2 + 2 >= length) {	// This index has exactly one child
+			largechild = index * 2 + 1;
+			if (A[index] < A[largechild]) {			//swap
+				A[index] += A[largechild];
+				A[largechild] = A[index] - A[largechild];
+				A[index] -= A[largechild];
+			}
+		}
+		else {		//This index has exactly two children
+			largechild = index * 2 + 1;
+			if (A[index * 2 + 2] > A[largechild]) largechild = index * 2 + 2;
+			if (A[index] < A[largechild]) {			//swap
+				A[index] += A[largechild];
+				A[largechild] = A[index] - A[largechild];
+				A[index] -= A[largechild];
+				shiftdown(A, largechild, length);	//Need to check again
+			}
+		}
+	}
 }
 
 template <class T>
-void _mergesort(T* A, int p, int r) {
-	if (p < r) {
-		int q = (p + r) / 2;
-		_mergesort(A, p, q);
-		_mergesort(A, q + 1, r);
-		merge(A, p, q, r);
+void makeheap(T* A, int length) {
+	for (int i = length - 1; i >= 0; --i) {
+		shiftdown(A, i, length);
 	}
 }
 
 template <class T>
-void merge(T* A, int p, int q, int r) {
-	int leftstart = p, leftend = q, rightstart = leftend + 1, rightend = r;
-	int leftlength = q - p + 1, rightlength = r - q, mergelength = leftlength + rightlength;
-	int i = leftstart, j = rightstart, k = 0;		//warning: pointer k location
-
-	T* M = new T[mergelength];
-	while (i <= leftend && j <= rightend) {
-		if (A[i] < A[j]) {
-			M[k] = A[i];
-			++i;
-		}
-		else {
-			M[k] = A[j];
-			++j;
-		}
-		++k;
+void heapsort(T* A, int length) {
+	makeheap(A, length);
+	while (length > 1) {
+		A[0] += A[length - 1];
+		A[length - 1] = A[0] - A[length - 1];
+		A[0] -= A[length - 1];
+		--length;
+		shiftdown(A, 0, length);
 	}
-	if (i > leftend) {
-		while (j <= rightend) {
-			M[k] = A[j];
-			++j;
-			++k;
-		}
-	}
-	else {
-		while (i <= leftend) {
-			M[k] = A[i];
-			++i;
-			++k;
-		}
-	}
-	int a = leftstart, m = 0;
-	while (a <= rightend && m < mergelength) {
-		A[a] = M[m];
-		++a;
-		++m;
-	}
-	delete[] M;
-}
-
-int main() {
-	int A[10] = { 0,11,22,33,55,66,77,99,88,45 };
-	mergesort<int>(A, 10);
-	for (int i = 0; i < 10; ++i) cout << A[i] << " ";
-	cout << endl;
-
-	cin.get();
-	return 0;
 }
